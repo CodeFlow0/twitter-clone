@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_12_08_170831) do
+ActiveRecord::Schema.define(version: 2023_12_08_185600) do
 
   create_table "sessions", force: :cascade do |t|
     t.string "token"
@@ -34,6 +34,7 @@ ActiveRecord::Schema.define(version: 2023_12_08_170831) do
     t.string "password", limit: 64, null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "password_digest"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
