@@ -139,7 +139,12 @@ function getUserTweets(username, callback) {
   newRequest['url'] = 'users/' + username + '/tweets';
   newRequest['success'] = function(response){
     console.log(response);
-    return callback(response.tweets);
+    if (response && Array.isArray(response)) {
+      return callback(response);
+    } else {
+      console.error("Invalid response from server:", response);
+      return callback([]);
+    }
   };
 
   $.ajax(newRequest);

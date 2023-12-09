@@ -10,8 +10,13 @@ $(".feeds.index").ready(function(){
       $('.username').text(currentUser);
       $('.screenName').text('@'+currentUser);
       getUserTweets(currentUser, function(response) {
-        $('.user-stats-tweets').text(response.length);
+        if (response && response.length !== undefined) {
+          $('.user-stats-tweets').text(response.length);
+        } else {
+          console.error("Invalid response from getUserTweets:", response);
+        }
       });
+      
     } else {
       window.location.replace("/");
     }
@@ -61,37 +66,43 @@ $(".feeds.index").ready(function(){
         getTweetsAndPost();
         charCount();
         getUserTweets(currentUser, function(response) {
-        $('.user-stats-tweets').text(response.length);
-      });
+          console.log("Response from getUserTweets:", response);
+          if (response && response.length !== undefined) {
+            $('.user-stats-tweets').text(response.length);
+          } else {
+            console.error("Invalid response from getUserTweets:", response);
+          }
+        });        
+      } else {
+        console.error("Error posting tweet.");
       }
     });
-  });
+  });  
 
   function getTweetsAndPost() {
-    getAllTweets(function(tweets){
+    getAllTweets(function (tweets) {
       $('.feed').text('');
-      $.each(tweets, function(index){
-        if(tweets[index]['username'] === currentUser) {
-          $('.feed').append(
-            '<div class="tweet col-xs-12"> \
-            <a class="tweet-username" href="#">'+tweets[index]['username']+'</a> \
-            <a class="tweet-screenName" href="#">@'+tweets[index]['username']+'</a> \
-            <p>'+tweets[index]['message']+'</p> \
-            <a class="delete-tweet" id="'+tweets[index]['id']+'" href="#">Delete</a> \
-            </div>'
-          );
-        } else {
-          $('.feed').append(
-            '<div class="tweet col-xs-12"> \
-            <a class="tweet-username" href="#">'+tweets[index]['username']+'</a> \
-            <a class="tweet-screenName" href="#">@'+tweets[index]['username']+'</a> \
-            <p>'+tweets[index]['message']+'</p> \
-            </div>'
-          );
+      $.each(tweets, function (index) {
+        const tweet = tweets[index];
+        const isCurrentUserTweet = tweet.username === currentUser;
+  
+        const tweetHtml =
+          '<div class="tweet col-xs-12">' +
+          '<a class="tweet-username" href="#">' + tweet.username + '</a>' +
+          '<a class="tweet-screenName" href="#">@' + tweet.username + '</a>' +
+          '<p>' + tweet.message + '</p>';
+  
+        if (isCurrentUserTweet) {
+          tweetHtml += '<a class="delete-tweet" id="' + tweet.id + '" href="#">Delete</a>';
         }
+  
+        tweetHtml += '</div>';
+  
+        $('.feed').append(tweetHtml);
       });
     });
   }
+  
 
   $(document).on('click', '.navbar-brand', function() {
     getTweetsAndPost();
@@ -107,30 +118,33 @@ $(".feeds.index").ready(function(){
 
   function getUserTweetsAndPost(username) {
     getUserTweets(username, function(response) {
-      $('.feed').text('');
-      console.log(response);
-      $.each(response, function(index){
-        if(response[index]['username'] === currentUser) {
-          $('.feed').append(
-            '<div class="tweet col-xs-12"> \
-            <a class="tweet-username" href="#">'+response[index]['username']+'</a> \
-            <a class="tweet-screenName" href="#">@'+response[index]['username']+'</a> \
-            <p>'+response[index]['message']+'</p> \
-            <a class="delete-tweet" id="'+response[index]['id']+'" href="#">Delete</a> \
-            </div>'
-          );
-        } else {
-          $('.feed').append(
-            '<div class="tweet col-xs-12"> \
-            <a class="tweet-username" href="#">'+response[index]['username']+'</a> \
-            <a class="tweet-screenName" href="#">@'+response[index]['username']+'</a> \
-            <p>'+response[index]['message']+'</p> \
-            </div>'
-          );
-        }
-      });
+      if (Array.isArray(response)) {
+        $('.feed').text('');
+        $.each(response, function(index){
+          if(response[index]['username'] === currentUser) {
+            $('.feed').append(
+              '<div class="tweet col-xs-12"> \
+              <a class="tweet-username" href="#">'+response[index]['username']+'</a> \
+              <a class="tweet-screenName" href="#">@'+response[index]['username']+'</a> \
+              <p>'+response[index]['message']+'</p> \
+              <a class="delete-tweet" id="'+response[index]['id']+'" href="#">Delete</a> \
+              </div>'
+            );
+          } else {
+            $('.feed').append(
+              '<div class="tweet col-xs-12"> \
+              <a class="tweet-username" href="#">'+response[index]['username']+'</a> \
+              <a class="tweet-screenName" href="#">@'+response[index]['username']+'</a> \
+              <p>'+response[index]['message']+'</p> \
+              </div>'
+            );
+          }
+        });
+      } else {
+        console.error("Invalid response from getUserTweets:", response);
+      }
     });
-  }
+  }  
 
   $(document).on('click', '.tweet-username', function() {
     getUserTweetsAndPost($(this).text());
