@@ -1,8 +1,11 @@
 class TweetsController < ApplicationController
-  before_action :authenticate_user, only: [:create, :destroy]
   before_action :set_tweet, only: [:destroy]
 
   def create
+    token = cookies.signed[:twitter_session_token]
+    session = Session.find_by(token: token)
+    current_user = session.user if session
+
     @tweet = current_user.tweets.build(tweet_params)
 
     if @tweet.save
@@ -13,6 +16,10 @@ class TweetsController < ApplicationController
   end
 
   def destroy
+    token = cookies.signed[:twitter_session_token]
+    session = Session.find_by(token: token)
+    current_user = session.user if session
+
     if @tweet.user == current_user
       @tweet.destroy
       render json: { message: 'Tweet deleted successfully' }
@@ -28,8 +35,8 @@ class TweetsController < ApplicationController
 
   def index_by_user
     @user = User.find_by(username: params[:username])
-    
-    if @user 
+
+    if @user
       @tweets = @user.tweets
       render json: @tweets
     else
