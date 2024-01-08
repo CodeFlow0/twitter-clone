@@ -22,15 +22,15 @@ class TweetsController < ApplicationController
 
     if @tweet.user == current_user
       @tweet.destroy
-      render json: { message: 'Tweet deleted successfully' }
+      render json: { success: true }, status: :ok
     else
-      render json: { error: 'Unauthorized to delete this tweet' }, status: :unauthorized
+      render json: { success: false }, status: :unauthorized
     end
   end
 
   def index
-    @tweets = Tweet.all
-    render json: @tweets
+    @tweets = Tweet.order(created_at: :desc)
+    render 'tweets/index'
   end
 
   def index_by_user
