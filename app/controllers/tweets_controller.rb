@@ -8,8 +8,8 @@ class TweetsController < ApplicationController
 
     @tweet = current_user.tweets.build(tweet_params)
 
-    if @tweet.save
-      render json: @tweet, status: :created
+    if @tweet.save!
+      render 'tweets/create', status: :created
     else
       render json: { errors: @tweet.errors.full_messages }, status: :unprocessable_entity
     end
@@ -38,7 +38,7 @@ class TweetsController < ApplicationController
 
     if @user
       @tweets = @user.tweets
-      render json: @tweets
+      render 'tweets/index'
     else
       render json: { error: 'User not found' }, status: :not_found
     end
